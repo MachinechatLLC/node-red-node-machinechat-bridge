@@ -1,0 +1,37 @@
+{
+  "name": "@machinechat/node-red-node-machinechat-bridge",
+  "version": "1.0.0",
+  "description": "Machinechat Bridge forwards Node-RED messages to Machinechat data visualization, monitoring, and analytics applications. Effortlessly upgrade Node-RED flows with web-based user interface, responsive custom dashboards, timeseries data storage, role-based user management, and more.",
+  "node-red": {
+    "version": ">=2.0.0",
+    "nodes": {
+      "machinechat-jedi-collect": "services/connector/machinechat-bridge.js"
+    }
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MachinechatLLC/node-red-node-machinechat-bridge.git"
+  },
+  "keywords": [
+    "Machinechat",
+    "Dashboard",
+    "Rules",
+    "RBE",
+    "Storage",
+    "Report",
+    "Notification",
+    "node-red"
+  ],
+  "author": "machinechat.io",
+  "license": "MIT",
+  "dependencies": {
+    "moment-timezone": "0.5.45", 
+    "mustache": "4.2.0"
+  }
+}
