@@ -75,7 +75,7 @@
         "method": "GET",
         "ret": "obj",
         "paytoqs": "ignore",
-        "url": "api.openweathermap.org/data/2.5/weather?q=hyderabad&units=imperial&appid=dd14e35f2394edda82e581aaf41b5998",
+        "url": "api.openweathermap.org/data/2.5/weather?q={city name}&units=imperial&appid={API key}",
         "tls": "",
         "persist": false,
         "proxy": "",
