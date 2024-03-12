@@ -116,7 +116,7 @@ module.exports = function (RED) {
      * HostURL and Port values required, UniqueIdentifier optional
      */
 
-    // node.log(JSON.stringify(config));
+    
     this.machinechatHostURL = config.inputHostURL.toString();
     this.MachineChatHTTPPort = config.inputPort.toString();
     this.machinechatUniqueIdentifier = config.inputUniqueIdentifier.toString();
@@ -140,8 +140,10 @@ module.exports = function (RED) {
       }
 
       if (node.fieldType === "msg") {
-        // Machinechat Data Collector payload data Object
+        // Clear the old status 
+        node.status({})
 
+        // Machinechat Data Collector payload data Object
         data = JSON.stringify({
           machinechat_context: {
             timestamp: moment().valueOf(),
@@ -166,47 +168,59 @@ module.exports = function (RED) {
         };
 
 
+        let responseData = "";
+
         req = http.request(httpConfig, (res) => {
+          // Clear the Status
           res.setEncoding("utf8");
-          res.on("data", (chunk) => {
-            // node.log(`BODY: ${chunk}`);
-            // If we make it this far, we'll update status
-            if (res.statusCode === 200) {
-              // check for @machinechat_context then prosses the status 
-              if (res.machinechat_context) {
-                if (res.machinechat_context.status) { // check the status and error code to display the status.
-                  // succes path @node-red-001
-                  if (res.machinechat_context.status.code === "node-red-001") {
-                    node.status({
-                      fill: "green",
-                      shape: "dot",
-                      text: ""
-                    });
-                  }else{
+          res.on("data", (rawData) => {
+            responseData += rawData;
+          });
+          res.on("end", () => {
+            try {
+              const data = JSON.parse(responseData);
+              if (res.statusCode === 200) {
+              // check for @machinechat_context then prosses the status
+              if (data.machinechat_context !== undefined) {
+                  if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
+                    // succes path @node-red-001
+                    if (data.machinechat_context.status.code === "node-red-001") {
+                      node.status({
+                        fill: "green",
+                        shape: "dot",
+                        text: ""
+                      });
+                    }else{
+                      node.status({
+                        fill: "red",
+                        shape: "dot",
+                        text: data.machinechat_context.status.message,
+                      });
+                    }
+                  }else{ // "Unknown Responce" if @machinechat_context is not available
                     node.status({
                       fill: "red",
                       shape: "dot",
-                      text: res.machinechat_context.status.message,
+                      text: "Unknown Responce"
                     });
                   }
                 }else{ // "Unknown Responce" if @machinechat_context is not available
                   node.status({
-                    fill: res.statusCode === 200 ? "green" : "red",
+                    fill: "red",
                     shape: "dot",
                     text: "Unknown Responce"
                   });
                 }
               }else{ // "Unknown Responce" if @machinechat_context is not available
                 node.status({
-                  fill: res.statusCode === 200 ? "green" : "red",
+                  fill: "red",
                   shape: "dot",
                   text: "Unknown Responce"
                 });
               }
+            } catch (error) {
+              node.error("Error parsing JSON response:", error);
             }
-          });
-          res.on("end", () => {
-            node.log("No more data in response.");
           });
         });
 
@@ -238,7 +252,7 @@ module.exports = function (RED) {
     }
 
     node.on("input", function (msg, send, done) {
-      node.log(JSON.stringify(msg))
+      // node.log(JSON.stringify(msg))
       // check if payload is JSON and parse
       if (isJson(msg.payload)) {
         msg.payload = JSON.parse(msg.payload);

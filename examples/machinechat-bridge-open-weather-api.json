@@ -1,0 +1,95 @@
+[
+    {
+        "id": "29891cdf0ca17251",
+        "type": "tab",
+        "label": "Machinechat Bridge - Open Weather API",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ece9e64ab5b8d435",
+        "type": "debug",
+        "z": "29891cdf0ca17251",
+        "name": "Data from Machinechat Bridge",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1330,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "2d42c9d3ba047ebc",
+        "type": "machinechat-bridge",
+        "z": "29891cdf0ca17251",
+        "inputHostURL": "127.0.0.1",
+        "inputPort": "8100",
+        "inputUniqueIdentifier": "open-weather",
+        "field": "payload",
+        "fieldType": "msg",
+        "output": "json",
+        "x": 1000,
+        "y": 320,
+        "wires": [
+            [
+                "ece9e64ab5b8d435"
+            ]
+        ]
+    },
+    {
+        "id": "847cc4fbfc5c3971",
+        "type": "inject",
+        "z": "29891cdf0ca17251",
+        "name": "Run API request every 30 min",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1800",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 370,
+        "y": 320,
+        "wires": [
+            [
+                "f420f3e04d6abf86"
+            ]
+        ]
+    },
+    {
+        "id": "f420f3e04d6abf86",
+        "type": "http request",
+        "z": "29891cdf0ca17251",
+        "name": "Open Weather API",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "api.openweathermap.org/data/2.5/weather?q=hyderabad&units=imperial&appid=dd14e35f2394edda82e581aaf41b5998",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 710,
+        "y": 320,
+        "wires": [
+            [
+                "2d42c9d3ba047ebc"
+            ]
+        ],
+        "info": "Built-in API request by city name\n\nYou can call by city name or city name, state code and country code. Please note that searching by states available only for the USA locations.\n\nAPI call\n\n`api.openweathermap.org/data/2.5/weather?q={city name}&units=imperial&appid={API key}`\n\n[https://openweathermap.org/current#geocoding](https://openweathermap.org/current#geocoding)\n\nUnits of measurement\n\nParameters\n\nunits optional standard, metric, imperial. When you do not use the units parameter, format is standard by default.\n\n[https://openweathermap.org/current#data](https://openweathermap.org/current#data)"
+    }
+]
