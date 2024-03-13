@@ -179,6 +179,7 @@ module.exports = function (RED) {
           res.on("end", () => {
             try {
               if (res.statusCode === 200) {
+              let data = responseData
               // check for @machinechat_context then prosses the status
               if (data.machinechat_context !== undefined) {
                   if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
