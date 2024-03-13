@@ -178,7 +178,6 @@ module.exports = function (RED) {
           });
           res.on("end", () => {
             try {
-              const data = JSON.parse(responseData);
               if (res.statusCode === 200) {
               // check for @machinechat_context then prosses the status
               if (data.machinechat_context !== undefined) {
