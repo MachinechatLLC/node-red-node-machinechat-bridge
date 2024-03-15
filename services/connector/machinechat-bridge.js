@@ -190,6 +190,8 @@ module.exports = function (RED) {
                         shape: "dot",
                         text: ""
                       });
+                      send(data);
+                      done();
                     }else{
                       node.status({
                         fill: "red",
@@ -235,8 +237,6 @@ module.exports = function (RED) {
         req.end();
 
         RED.util.setMessageProperty(msg, node.field, value);
-        send(msg);
-        done();
       } else if (node.fieldType === "flow" || node.fieldType === "global") {
         var context = RED.util.parseContextStore(node.field);
         var target = node.context()[node.fieldType];
