@@ -1,25 +1,36 @@
 <script type="text/html" data-template-name="machinechat-bridge">
   <div class="form-row">
-    <label for="node-input-name"
+    <label for="node-input-inputHostURL" style="display: inline-block; width: auto; vertical-align: middle;"
       ><i class="fa fa-globe"></i> <span> Host Address</span></label
     >
-    <input type="text" id="node-input-inputHostURL" placeholder="localhost" />
+    <input type="text" id="node-input-inputHostURL" placeholder="localhost" style="display: inline-block; width: 100%; vertical-align: middle;" />
   </div>
   <div class="form-row">
-    <label for="node-input-name"
+    <label for="node-input-inputPort" style="display: inline-block; width: auto; vertical-align: middle;"
       ><i class="fa fa-server"></i> <span> Port</span></label
     >
-    <input type="text" id="node-input-inputPort" placeholder="8100" />
+    <input type="text" id="node-input-inputPort" placeholder="8100" style="display: inline-block; width: 100%; vertical-align: middle;" />
   </div>
   <div class="form-row">
-    <label for="node-input-name"
+    <label for="node-input-inputUniqueIdentifier" style="display: inline-block;width: auto; vertical-align: middle;"
       ><i class="fa fa-id-card"></i> <span> Unique Identifier </span></label
     >
     <input
       type="text"
       id="node-input-inputUniqueIdentifier"
       placeholder="Unique Identifier or {{payload.id}}"
+      style="display: inline-block; width: 100%; vertical-align: middle;"
     />
+  </div>
+
+  <div class="form-row">
+    <input
+    type="checkbox" 
+      id="node-input-copyMcData"
+      style="display: inline-block; width: auto; vertical-align: top;" 
+      autocomplete="off"
+    />
+    <label for="node-input-copyMcData" style="width: auto">Copy Machinechat Data to Payload </label>
   </div>
 
   <div class="form-row hide">
@@ -58,6 +69,7 @@
         required: true,
         validate: RED.validators.regex(/^.{6,}$/),
       },
+      copyMcData: { value: "", required: true },
       field: {
         value: "payload",
         validate: RED.validators.typedInput("fieldType"),
@@ -69,8 +81,7 @@
     outputs: 1,
     icon: "mc-logo.png",
     align: "right",
-    inputLabels: ["Expects JSON input"],
-    outputLabels: ["JSON output from Decoded"],
+    inputLabels: ["Expects input on msg.payload"],
     label: "Machinechat Bridge",
     oneditprepare: function () {
       var that = this;

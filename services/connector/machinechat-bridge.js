@@ -102,6 +102,10 @@ module.exports = function (RED) {
     return true;
   }
 
+  function isObject(obj) {
+    return Object.prototype.toString.call(obj) === '[object Object]';
+  }
+  
   function decodeHTML(text) {
     return text.replace(/&#x([0-9A-F]{1,6});/gi, (match, code) => {
       return String.fromCharCode(parseInt(code, 16));
@@ -114,12 +118,12 @@ module.exports = function (RED) {
 
     /**
      * HostURL and Port values required, UniqueIdentifier optional
-     */
-
+    */
     
     this.machinechatHostURL = config.inputHostURL.toString();
     this.MachineChatHTTPPort = config.inputPort.toString();
     this.machinechatUniqueIdentifier = config.inputUniqueIdentifier.toString();
+    this.machinechatCopyMcData = config.copyMcData
     this.nodeRedVersion = RED.version();
 
     this.field = config.field || "payload";
@@ -128,11 +132,12 @@ module.exports = function (RED) {
     this.fieldType = config.fieldType || "msg";
     this.outputFormat = config.output || "str";
 
-    function output(msg, value, send, done) {
+    function output(msg, value, send, done, rawInput) {
       var req,
         data,
         httpConfig,
-        payload = msg
+        payload = msg,
+        prasedRawInput = JSON.parse(JSON.stringify(rawInput)) // parse untouched raw input data
 
       /* istanbul ignore else  */
       if (node.outputFormat === "json") {
@@ -143,60 +148,95 @@ module.exports = function (RED) {
         // Clear the old status 
         node.status({})
 
-        // Machinechat Data Collector payload data Object
-        data = JSON.stringify({
-          machinechat_context: {
-            timestamp: moment().valueOf(),
-            unique_identifier: decodeHTML(node.machinechatUniqueIdentifier)
-          },
-          node_red_context:{
-            nodeRedVersion : node.nodeRedVersion
-          },
-          msg: payload,
-        });
-
-        // http config setup for Machinechat Bridge on node-red
-        httpConfig = {
-          hostname: node.machinechatHostURL,
-          port: node.MachineChatHTTPPort,
-          path: "/v1/node-red/msg",
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(data),
-          },
-        };
-
-
-        let responseData = "";
-
-        req = http.request(httpConfig, (res) => {
-          // Clear the Status
-          res.setEncoding("utf8");
-          res.on("data", (rawData) => {
-            responseData += rawData;
+        // Need to check the payload is not empty before processing the API call
+        if (prasedRawInput.payload === "") {
+          node.status({ fill: "red", shape: "dot", text: "Message has an empty payload" });
+          send(prasedRawInput);
+          done();
+        }else{
+          // Machinechat Data Collector payload data Object
+          data = JSON.stringify({
+            machinechat_context: {
+              timestamp: moment().valueOf(),
+              unique_identifier: decodeHTML(node.machinechatUniqueIdentifier)
+            },
+            node_red_context:{
+              nodeRedVersion : node.nodeRedVersion
+            },
+            msg: payload,
           });
-          res.on("end", () => {
-            try {
-              if (res.statusCode === 200) {
-              const data = JSON.parse(responseData);
-              // check for @machinechat_context then prosses the status
-              if (data.machinechat_context !== undefined) {
-                  if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
-                    // succes path @node-red-001
-                    if (data.machinechat_context.status.code === "node-red-001") {
-                      node.status({
-                        fill: "green",
-                        shape: "dot",
-                        text: ""
-                      });
-                      send(data);
-                      done();
-                    }else{
+
+          // http config setup for Machinechat Bridge on node-red
+          httpConfig = {
+            hostname: node.machinechatHostURL,
+            port: node.MachineChatHTTPPort,
+            path: "/v1/node-red/msg",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Content-Length": Buffer.byteLength(data),
+            },
+          };
+
+          let responseData = "";
+
+          req = http.request(httpConfig, (res) => {
+            // Clear the Status
+            res.setEncoding("utf8");
+            res.on("data", (rawData) => {
+              responseData += rawData;
+            });
+            res.on("end", () => {
+              try {
+                if (res.statusCode === 200) {
+                const data = JSON.parse(responseData);
+                // check for @machinechat_context then prosses the status
+                if (data.machinechat_context !== undefined) {
+                    if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
+                      // succes path @node-red-001 
+                      if (data.machinechat_context.status.code === "node-red-001") { // check for Copy Machinechat Data to Payload flag and Input Payload is an Object
+                        if (node.machinechatCopyMcData === true) {
+                          let isPayloadObject = isObject(prasedRawInput.payload);
+                          if (isPayloadObject) {
+                            data.msg.payload["mc"] = data.machinechat_context.mc
+                            // set the Status to node-red
+                            node.status({
+                              fill: "green",
+                              shape: "dot",
+                              text: ""
+                            });
+                            done();
+                          }else{
+                            node.status({
+                              fill: "red",
+                              shape: "dot",
+                              text: "Cannot copy Machinechat data into payload - payload type is not object"
+                            })
+                            done();
+                          }
+                        }else{
+                          // set the Status to node-red
+                          node.status({
+                            fill: "green",
+                            shape: "dot",
+                            text: ""
+                          });
+                          // send output data
+                          send(prasedRawInput);
+                          done();
+                        }
+                      }else{
+                        node.status({
+                          fill: "red",
+                          shape: "dot",
+                          text: data.machinechat_context.status.message,
+                        });
+                      }
+                    }else{ // "Unknown Responce" if @machinechat_context without status and code.
                       node.status({
                         fill: "red",
                         shape: "dot",
-                        text: data.machinechat_context.status.message,
+                        text: "Unknown Responce"
                       });
                     }
                   }else{ // "Unknown Responce" if @machinechat_context is not available
@@ -206,37 +246,33 @@ module.exports = function (RED) {
                       text: "Unknown Responce"
                     });
                   }
-                }else{ // "Unknown Responce" if @machinechat_context is not available
+                }else{ // "Unknown Responce" if statusCode is not available
                   node.status({
                     fill: "red",
                     shape: "dot",
                     text: "Unknown Responce"
                   });
                 }
-              }else{ // "Unknown Responce" if @machinechat_context is not available
-                node.status({
-                  fill: "red",
-                  shape: "dot",
-                  text: "Unknown Responce"
-                });
+              } catch (error) {
+                node.error("Error parsing JSON response:", error);
+                send(prasedRawInput)
+                done();
               }
-            } catch (error) {
-              node.error("Error parsing JSON response:", error);
-            }
+            });
           });
-        });
 
-        // error path
-        req.on("error", (e) => {
-          node.error(`problem with request: ${e.message}`);
-          node.status({ fill: "red", shape: "dot", text: e.message });
-        });
+          // error path
+          req.on("error", (e) => {
+            node.error(`problem with request: ${e.message}`);
+            node.status({ fill: "red", shape: "dot", text: e.message });
+          });
 
-        // Write data to request body
-        req.write(data);
-        req.end();
+          // Write data to request body
+          req.write(data);
+          req.end();
 
-        RED.util.setMessageProperty(msg, node.field, value);
+          RED.util.setMessageProperty(msg, node.field, value);
+        }
       } else if (node.fieldType === "flow" || node.fieldType === "global") {
         var context = RED.util.parseContextStore(node.field);
         var target = node.context()[node.fieldType];
@@ -244,7 +280,7 @@ module.exports = function (RED) {
           if (err) {
             done(err);
           } else {
-            send(msg);
+            send(prasedRawInput)
             done();
           }
         });
@@ -252,7 +288,7 @@ module.exports = function (RED) {
     }
 
     node.on("input", function (msg, send, done) {
-      // node.log(JSON.stringify(msg))
+      let rawInput = msg
       // check if payload is JSON and parse
       if (isJson(msg.payload)) {
         msg.payload = JSON.parse(msg.payload);
@@ -273,7 +309,7 @@ module.exports = function (RED) {
          * through inbound msg.template IFF node.template empty
          */
 
-        output(msg, msg, send, done);
+        output(msg, msg, send, done, rawInput);
       } catch (err) {
         done(err.message);
       }
