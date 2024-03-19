@@ -198,6 +198,7 @@ module.exports = function (RED) {
                         if (node.machinechatCopyMachinechatData === true) {
                           let isPayloadObject = isObject(prasedRawInput.payload);
                           if (isPayloadObject) {
+                            // Add Machinechat Data into @payload["mc"]
                             data.msg.payload["mc"] = data.machinechat_context.mc
                             // set the Status to node-red
                             node.status({
@@ -205,6 +206,7 @@ module.exports = function (RED) {
                               shape: "dot",
                               text: ""
                             });
+                            send(data.msg);
                             done();
                           }else{
                             node.status({
