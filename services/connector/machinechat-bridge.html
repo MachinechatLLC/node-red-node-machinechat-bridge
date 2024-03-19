@@ -30,7 +30,7 @@
       style="display: inline-block; width: auto; vertical-align: top;" 
       autocomplete="off"
     />
-    <label for="node-input-copyMcData" style="width: auto">Copy Machinechat Data to Payload </label>
+    <label for="node-input-copyMcData" style="width: auto">Copy Machinechat Data to Payload</label>
   </div>
 
   <div class="form-row hide">
@@ -69,7 +69,7 @@
         required: true,
         validate: RED.validators.regex(/^.{6,}$/),
       },
-      copyMcData: { value: "", required: true },
+      copyMcData: { value: ""},
       field: {
         value: "payload",
         validate: RED.validators.typedInput("fieldType"),
