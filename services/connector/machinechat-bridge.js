@@ -123,7 +123,7 @@ module.exports = function (RED) {
     this.machinechatHostURL = config.inputHostURL.toString();
     this.MachineChatHTTPPort = config.inputPort.toString();
     this.machinechatUniqueIdentifier = config.inputUniqueIdentifier.toString();
-    this.machinechatCopyMcData = config.copyMcData
+    this.machinechatCopyMachinechatData = config.copyMachinechatData
     this.nodeRedVersion = RED.version();
 
     this.field = config.field || "payload";
@@ -195,7 +195,7 @@ module.exports = function (RED) {
                     if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
                       // succes path @node-red-001 
                       if (data.machinechat_context.status.code === "node-red-001") { // check for Copy Machinechat Data to Payload flag and Input Payload is an Object
-                        if (node.machinechatCopyMcData === true) {
+                        if (node.machinechatCopyMachinechatData === true) {
                           let isPayloadObject = isObject(prasedRawInput.payload);
                           if (isPayloadObject) {
                             data.msg.payload["mc"] = data.machinechat_context.mc
