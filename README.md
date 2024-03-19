@@ -19,8 +19,8 @@ npm install @machinechat/node-red-node-machinechat-bridge
 
 **Copy Machinechat Data to Payload:** check this box to copy Machinechat data from codec to msg.payload.
 
-[Machinechat Bridge Docs](https://docs.machinechat.io/machinechat-bridge-for-node-red/){:target="_blank"}
+[Machinechat Bridge Docs](https://docs.machinechat.io/machinechat-bridge-for-node-red/)
 
-[Machinechat JEDI Node-RED Decoder Docs](https://docs.machinechat.io/machinechat-jedi/data-collectors/custom-decoding-for-node-red/custom-decoding-for-node-red/){:target="_blank"}
+[Machinechat JEDI Node-RED Decoder Docs](https://docs.machinechat.io/machinechat-jedi/data-collectors/custom-decoding-for-node-red/custom-decoding-for-node-red/)
 
-[Machinechat JEDI](https://www.machinechat.io/jedi){:target="_blank"}
+[Machinechat JEDI](https://www.machinechat.io/jedi)
