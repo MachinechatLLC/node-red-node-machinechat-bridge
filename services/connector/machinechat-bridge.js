@@ -194,7 +194,7 @@ module.exports = function (RED) {
                 if (data.machinechat_context !== undefined) {
                     if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
                       // succes path @node-red-001 
-                      if (data.machinechat_context.status.code === "node-red-001") { // check for Copy Machinechat Data to Payload flag and Input Payload is an Object
+                      if (data.machinechat_context.status.code.toLowerCase() === "codec-nodered-001") { // check for Copy Machinechat Data to Payload flag and Input Payload is an Object
                         if (node.machinechatCopyMachinechatData === true) {
                           let isPayloadObject = isObject(prasedRawInput.payload);
                           if (isPayloadObject) {

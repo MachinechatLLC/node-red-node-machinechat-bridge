@@ -17,4 +17,10 @@ npm install @machinechat/node-red-node-machinechat-bridge
 
 **Unique Identifier:** is a number or a string that you choose and will be used to configure how Machinechat’s software will process the Node-RED messages received from this node instance. Messages from nodes with the same identifier will be processed in the same way.
 
-Copy Machinechat Data to Payload.
+**Copy Machinechat Data to Payload:** check this box to copy Machinechat data from codec to msg.payload.
+
+[Machinechat Bridge Docs](https://docs.machinechat.io/machinechat-bridge-for-node-red/)
+
+[Machinechat JEDI Node-RED Decoder Docs](https://docs.machinechat.io/machinechat-jedi/data-collectors/custom-decoding-for-node-red/custom-decoding-for-node-red/)
+
+[Machinechat JEDI](https://www.machinechat.io/jedi)
