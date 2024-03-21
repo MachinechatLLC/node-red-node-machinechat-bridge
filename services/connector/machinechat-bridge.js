@@ -134,7 +134,7 @@ module.exports = function (RED) {
 
     function output(msg, value, send, done, rawInput) {
       var req,
-        data,
+        postData,
         httpConfig,
         payload = msg,
         prasedRawInput = JSON.parse(JSON.stringify(rawInput)) // parse untouched raw input data
@@ -155,7 +155,7 @@ module.exports = function (RED) {
           done();
         }else{
           // Machinechat Data Collector payload data Object
-          data = JSON.stringify({
+          postData = JSON.stringify({
             machinechat_context: {
               timestamp: moment().valueOf(),
               unique_identifier: decodeHTML(node.machinechatUniqueIdentifier)
@@ -174,7 +174,7 @@ module.exports = function (RED) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Content-Length": Buffer.byteLength(data),
+              "Content-Length": Buffer.byteLength(postData),
             },
           };
 
@@ -195,7 +195,7 @@ module.exports = function (RED) {
                     if (data.machinechat_context.status !== undefined && data.machinechat_context.status.code !== undefined) { // check the status and error code to display the status.
                       // succes path @node-red-001 
                       if (data.machinechat_context.status.code.toLowerCase() === "codec-nodered-001") { // check for Copy Machinechat Data to Payload flag and Input Payload is an Object
-                        if (node.machinechatCopyMachinechatData === true) {
+                        if (node.machinechatCopyMachinechatData === true && data.machinechat_context.mc !== undefined) {
                           let isPayloadObject = isObject(prasedRawInput.payload);
                           if (isPayloadObject) {
                             // Add Machinechat Data into @payload["mc"]
@@ -234,11 +234,11 @@ module.exports = function (RED) {
                           text: data.machinechat_context.status.message,
                         });
                       }
-                    }else{ // "Unknown Responce" if @machinechat_context without status and code.
+                    }else{ // "Missing Status" if @machinechat_context without status and code.
                       node.status({
                         fill: "red",
                         shape: "dot",
-                        text: "Unknown Responce"
+                        text: "Missing Status"
                       });
                     }
                   }else{ // "Unknown Responce" if @machinechat_context is not available
@@ -256,7 +256,7 @@ module.exports = function (RED) {
                   });
                 }
               } catch (error) {
-                node.error("Error parsing JSON response:", error);
+                node.error(error);
                 send(prasedRawInput)
                 done();
               }
@@ -269,8 +269,8 @@ module.exports = function (RED) {
             node.status({ fill: "red", shape: "dot", text: e.message });
           });
 
-          // Write data to request body
-          req.write(data);
+          // Write postData to request body
+          req.write(postData);
           req.end();
 
           RED.util.setMessageProperty(msg, node.field, value);
