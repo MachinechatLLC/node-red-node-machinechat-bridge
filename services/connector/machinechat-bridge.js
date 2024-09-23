@@ -234,25 +234,25 @@ module.exports = function (RED) {
                           text: data.machinechat_context.status.message,
                         });
                       }
-                    }else{ // "Missing Status" if @machinechat_context without status and code.
+                    }else{ // "No status information in response." if @machinechat_context without status and code.
                       node.status({
                         fill: "red",
                         shape: "dot",
-                        text: "Missing Status"
+                        text: "No status information in response."
                       });
                     }
-                  }else{ // "Unknown Responce" if @machinechat_context is not available
+                  }else{ // "No Machinechat context in response." if @machinechat_context is not available
                     node.status({
                       fill: "red",
                       shape: "dot",
-                      text: "Unknown Responce"
+                      text: "No Machinechat context in response."
                     });
                   }
-                }else{ // "Unknown Responce" if statusCode is not available
+                }else{ // "No status code in response." if statusCode is not available
                   node.status({
                     fill: "red",
                     shape: "dot",
-                    text: "Unknown Responce"
+                    text: "No status code in response."
                   });
                 }
               } catch (error) {
